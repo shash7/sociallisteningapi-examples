@@ -1,0 +1,286 @@
+{
+  "id": "y3Qj7rKp9mL2vW5x",
+  "name": "SocialListeningAPI brand and competitor monitor",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "74699c22-054c-49db-a862-8f93fe8e96a7",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -900,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "days",
+              "daysInterval": 1,
+              "triggerAtHour": 9,
+              "triggerAtMinute": 0
+            }
+          ]
+        }
+      },
+      "id": "2b1dd665-5e46-42cf-a8b4-4f8d93f24ed3",
+      "name": "Daily at 9 AM",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -900,
+        360
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "26c8424e-faf2-47ea-a730-9b982321a885",
+              "name": "brand",
+              "value": "YOUR_BRAND",
+              "type": "string"
+            },
+            {
+              "id": "398ff37b-1600-46f4-abd6-27ee3a499e53",
+              "name": "competitor",
+              "value": "YOUR_COMPETITOR",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "70405454-ad77-43db-98c1-412598ac4773",
+      "name": "Monitoring settings",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -660,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const config = $input.first().json;\nconst queries = [\n  { searchType: 'brand', query: config.brand },\n  { searchType: 'competitor', query: config.competitor },\n];\nconst sources = [\n  { platform: 'linkedin', path: '/linkedin/search', creditCost: 2 },\n  { platform: 'x', path: '/x/search', creditCost: 1 },\n  { platform: 'reddit', path: '/reddit/search-posts', creditCost: 1 },\n];\nconst output = [];\n\nfor (const query of queries) {\n  for (const source of sources) {\n    output.push({\n      json: {\n        searchType: query.searchType,\n        query: query.query,\n        platform: source.platform,\n        path: source.path,\n        creditCost: source.creditCost,\n      },\n    });\n  }\n}\n\nreturn output;"
+      },
+      "id": "05aec30f-a69e-47cb-a5b8-bf7509a42ca2",
+      "name": "Build searches",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -420,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ 'https://api.sociallisteningapi.com/api/v1' + $json.path }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "={{ $json.query }}"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true,
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "4f0a0595-b46b-4e08-a37c-f75b0a274c59",
+      "name": "Search public posts",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -160,
+        260
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "SELECT_YOUR_CREDENTIAL",
+          "name": "SocialListeningAPI"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const responses = $input.all();\nconst searches = $('Build searches').all();\nconst output = [];\n\nfor (let index = 0; index < responses.length; index++) {\n  const response = responses[index].json;\n  const search = searches[index].json;\n\n  if (response.success !== true) {\n    let message = 'Request failed without an API error message.';\n\n    // Network and API errors can have different shapes, so keep a readable fallback.\n    if (response.error && response.error.message) {\n      message = response.error.message;\n    }\n\n    output.push({\n      json: {\n        kind: 'error',\n        searchType: search.searchType,\n        query: search.query,\n        platform: search.platform,\n        sourceUrl: 'https://api.sociallisteningapi.com/api/v1' + search.path,\n        dedupeKey: 'error:' + Date.now() + ':' + index + ':' + search.searchType,\n        message,\n      },\n    });\n    continue;\n  }\n\n  for (const item of response.data.items) {\n    output.push({\n      json: {\n        kind: 'result',\n        searchType: search.searchType,\n        query: search.query,\n        platform: search.platform,\n        sourceUrl: item.url,\n        dedupeKey: item.url,\n        title: item.content.title,\n        text: item.content.text,\n        author: item.author.display_name,\n        publishedAt: item.published_at,\n      },\n    });\n  }\n}\n\nreturn output;"
+      },
+      "id": "0050851c-5a22-43c1-8723-5d11eb996f64",
+      "name": "Flatten results",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        100,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "removeItemsSeenInPreviousExecutions",
+        "logic": "removeItemsWithAlreadySeenKeyValues",
+        "dedupeValue": "={{ $json.dedupeKey }}",
+        "options": {
+          "scope": "workflow",
+          "historySize": 10000
+        }
+      },
+      "id": "54c59989-6833-498a-837c-aef97f385c86",
+      "name": "Remove seen source URLs",
+      "type": "n8n-nodes-base.removeDuplicates",
+      "typeVersion": 2,
+      "position": [
+        360,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all().map((item) => item.json);\nconst results = items.filter((item) => item.kind === 'result');\nconst failures = items.filter((item) => item.kind === 'error');\n\nresults.sort((firstItem, secondItem) => {\n  return Date.parse(secondItem.publishedAt) - Date.parse(firstItem.publishedAt);\n});\n\nconst lines = [\n  '# Social listening review',\n  '',\n  'New source URLs: ' + results.length,\n  'Source failures: ' + failures.length,\n  '',\n];\n\nconst reviewItems = results.slice(0, 12);\n\nfor (const item of reviewItems) {\n  let summary = item.title || item.text || 'Post needs review';\n  summary = summary.replace(/\\s+/g, ' ').trim();\n\n  if (summary.length > 180) {\n    summary = summary.slice(0, 177) + '...';\n  }\n\n  lines.push(\n    '- [' + item.searchType + ' · ' + item.platform + '] ' + summary +\n      ' — ' + item.sourceUrl,\n  );\n}\n\nif (results.length > reviewItems.length) {\n  lines.push('- ' + (results.length - reviewItems.length) + ' more new posts need review.');\n}\n\nif (failures.length > 0) {\n  lines.push('', '## Search gaps');\n\n  for (const failure of failures) {\n    lines.push(\n      '- ' + failure.searchType + ' · ' + failure.platform + ': ' + failure.message +\n        ' — ' + failure.sourceUrl,\n    );\n  }\n}\n\nlines.push('', 'Human review required before replying or reporting.');\n\nreturn [{\n  json: {\n    digest: lines.join('\\n'),\n    newSourceCount: results.length,\n    failureCount: failures.length,\n  },\n}];"
+      },
+      "id": "7ecb6104-4069-42da-9f07-9a1727e5b922",
+      "name": "Prepare review digest",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        620,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "YOUR_SLACK_CHANNEL_ID",
+          "mode": "id"
+        },
+        "text": "={{ $json.digest }}",
+        "otherOptions": {}
+      },
+      "id": "fe8cfa0d-d49f-4ec7-8972-61c6dfda0781",
+      "name": "Send digest to Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        880,
+        260
+      ],
+      "disabled": true
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Monitoring settings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Daily at 9 AM": {
+      "main": [
+        [
+          {
+            "node": "Monitoring settings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Monitoring settings": {
+      "main": [
+        [
+          {
+            "node": "Build searches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build searches": {
+      "main": [
+        [
+          {
+            "node": "Search public posts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search public posts": {
+      "main": [
+        [
+          {
+            "node": "Flatten results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Flatten results": {
+      "main": [
+        [
+          {
+            "node": "Remove seen source URLs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remove seen source URLs": {
+      "main": [
+        [
+          {
+            "node": "Prepare review digest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare review digest": {
+      "main": [
+        [
+          {
+            "node": "Send digest to Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "e701ef8d-98c4-4d79-931c-a9fae731d06e",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
+}

@@ -1,0 +1,11 @@
+{
+  "name": "sociallisteningapi-javascript-agent-example",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Dependency-free SocialListeningAPI search example for marketing agents",
+  "license": "MIT",
+  "scripts": {
+    "start": "node index.js"
+  }
+}
