@@ -21,6 +21,24 @@ One query across all three sources costs 4 credits. A brand query plus a competi
 8 credits when all six requests succeed. SocialListeningAPI uses one-time credit packs, and
 credits do not expire.
 
+## Real Apify example
+
+On August 10, 2026, the n8n workflow searched `apify` across LinkedIn, X, and Reddit. It returned
+77 new source URLs, used 4 credits, and reported 0 source failures. Results change as public posts
+change. Review each source before using it in marketing work.
+
+![n8n workflow searching LinkedIn, X, and Reddit](assets/n8n-workflow.png)
+
+![Apify review digest with 77 new source URLs and 0 failures](assets/apify-review-digest.png)
+
+## Dedupe proof
+
+On August 12, 2026, n8n execution #7 returned 77 source URLs. The workflow kept 0 and
+discarded all 77 as previously seen. It reported 0 source failures and did not create an empty
+digest. This proof run used 4 credits.
+
+![n8n dedupe proof showing 77 results and 0 kept items](assets/n8n-dedupe-proof.png)
+
 ## Start here
 
 1. Create an account at [SocialListeningAPI](https://sociallisteningapi.com) and copy your API
