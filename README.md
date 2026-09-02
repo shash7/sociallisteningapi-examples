@@ -1,15 +1,68 @@
-# SocialListeningAPI examples for marketers
+# SocialListeningAPI Cursor plugin and examples
 
-People talk about your brand and competitors across different networks. Checking each network
-by hand is slow, and broad searches create noisy reports. This repository gives you one working
-starting point: search LinkedIn, X, and Reddit for one brand and one competitor, remove URLs you
-have already seen, then prepare a sourced review digest.
+This repository installs the SocialListeningAPI MCP in Cursor. It also includes working brand and
+competitor research examples for n8n, OpenClaw, and JavaScript.
+
+SocialListeningAPI searches current public social posts and web results. Cursor can use those
+results while researching a market, checking product feedback, finding public conversations, or
+collecting source links for a report.
+
+## Connect SocialListeningAPI to Cursor
+
+1. Create a [SocialListeningAPI](https://sociallisteningapi.com) account.
+2. Install the SocialListeningAPI plugin from the Cursor Marketplace.
+3. Open the plugin in Cursor and connect the MCP.
+4. Sign in to SocialListeningAPI and approve access to your workspace credits.
+5. Ask Cursor to search one or more supported public sources.
+
+The Cursor plugin uses OAuth. You do not need to paste an API key into Cursor or this repository.
+
+During local plugin testing, place this repository at
+`~/.cursor/plugins/local/sociallisteningapi`, then reload Cursor. The marketplace version will use
+the same MCP configuration from [`mcp.json`](mcp.json).
+
+Try this prompt after connecting:
+
+```text
+Use SocialListeningAPI to search LinkedIn, X, and Reddit for public posts about
+"social listening API pricing". Group useful results by common question or problem. Include the
+public source URL for every finding, and list any source that failed.
+```
+
+## What Cursor can search
+
+The MCP can:
+
+- search public posts from LinkedIn, X, Reddit, Facebook, Hacker News, TikTok, and YouTube;
+- retrieve Google results;
+- search Instagram users, hashtags, and places, then retrieve a public Instagram profile;
+- search public Reddit comments or retrieve comments from one Reddit post;
+- retrieve an X profile, user posts, thread, or tweet replies;
+- retrieve public posts from one LinkedIn profile.
+
+Facebook searches cost 7 workspace credits. LinkedIn requests and Reddit comment searches cost
+2 credits. Other current MCP requests cost 1 credit. Failed requests use 0 credits.
+
+Results depend on public source availability and may be incomplete. SocialListeningAPI does not
+provide native scheduling, saved history, alerts, sentiment analysis, lead scoring, or reply
+automation through this plugin.
+
+See [`mcp/README.md`](mcp/README.md) for more Cursor prompts, current limits, and credit examples.
+
+## Other examples in this repository
+
+The n8n, OpenClaw, and JavaScript examples search LinkedIn, X, and Reddit for one brand and one
+competitor. They remove source URLs already reviewed and prepare a sourced digest.
 
 Allow about 10 minutes for the JavaScript or OpenClaw example. The n8n workflow usually takes
 about 20 minutes because you must add credentials, choose a timezone, and connect Slack if you
 want delivery.
 
-## What one run costs
+Unlike the Cursor plugin, these examples use a SocialListeningAPI API key. Store the key in an
+environment variable or your tool's credential store. Never paste it into a script, prompt, or
+exported workflow.
+
+### What one API example run costs
 
 | Public search | Route | Credits |
 | --- | --- | ---: |
@@ -33,37 +86,22 @@ change. Review each source before using it in marketing work.
 
 ## Dedupe proof
 
-On August 12, 2026, n8n execution #7 returned 77 source URLs. The workflow kept 0 and
-discarded all 77 as previously seen. It reported 0 source failures and did not create an empty
-digest. This proof run used 4 credits.
+On August 12, 2026, n8n execution #7 returned 77 source URLs. The workflow kept 0 and discarded
+all 77 as previously seen. It reported 0 source failures and did not create an empty digest. This
+proof run used 4 credits.
 
 ![n8n dedupe proof showing 77 results and 0 kept items](assets/n8n-dedupe-proof.png)
 
-## Start here
+## Run an API example
 
-1. Create an account at [SocialListeningAPI](https://sociallisteningapi.com) and copy your API
-   key.
-2. Choose the example that matches your current tool:
+1. Create a SocialListeningAPI account and copy your API key.
+2. Choose an example:
    - `openclaw/` for an installable agent skill;
    - `n8n/` for a scheduled, no-LLM review workflow;
-   - `mcp/` for manual research prompts;
-   - `javascript-agent/` for a dependency-free Node example.
-3. Add the key through an environment variable or your tool's credential store. Never paste it
-   into a script, prompt, or exported workflow.
+   - `javascript-agent/` for a dependency-free Node.js example.
+3. Add the API key through an environment variable or credential store.
 4. Replace the example brand and competitor names.
 5. Run once manually and review the source links before adding a schedule.
-
-## What the API does
-
-SocialListeningAPI searches public data and returns normalized results. It provides one API key
-and one response structure across the sources used here.
-
-Scheduling, stored history, deduplication, classification, Slack delivery, and alerts happen in
-OpenClaw, n8n, your JavaScript application, or another external tool. They are not native API
-features. Results can be incomplete or irrelevant. A marketer should review each source before
-replying, reporting, or making a decision.
-
-## Examples
 
 ### OpenClaw
 
@@ -80,13 +118,8 @@ command.
 ### n8n
 
 Import `n8n/brand-competitor-monitor.json`, then follow `n8n/README.md`. The workflow runs
-manually or every day at 9:00 AM, remembers up to 10,000 source URLs, prepares a short digest,
-and has a disabled Slack step ready for your credential and channel.
-
-### MCP
-
-Use the copyable prompts in `mcp/README.md` with an MCP tool that can make authenticated HTTP
-requests. This is for manual research. It does not create a schedule or stored monitoring state.
+manually or every day at 9:00 AM, remembers up to 10,000 source URLs, prepares a short digest, and
+has a disabled Slack step ready for your credential and channel.
 
 ### JavaScript
 
@@ -97,6 +130,12 @@ SOCIALLISTENING_API_KEY=your_key node index.js "YOUR_BRAND" linkedin,x,reddit
 
 The module exports `searchConversations(query, platforms)` for reuse in an agent or internal
 marketing tool.
+
+## What happens outside SocialListeningAPI
+
+Scheduling, stored history, deduplication, classification, Slack delivery, and alerts happen in
+OpenClaw, n8n, your JavaScript application, Cursor, or another external tool. SocialListeningAPI
+searches public data and returns the available results.
 
 ## Tested versions
 

@@ -1,0 +1,7 @@
+{
+  "mcpServers": {
+    "sociallisteningapi": {
+      "url": "https://api.sociallisteningapi.com/mcp"
+    }
+  }
+}

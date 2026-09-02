@@ -1,0 +1,16 @@
+{
+  "name": "sociallisteningapi",
+  "displayName": "SocialListeningAPI",
+  "version": "1.0.0",
+  "description": "Search public social posts and web results directly from Cursor.",
+  "author": {
+    "name": "SocialListeningAPI",
+    "email": "shash@mentionkit.com"
+  },
+  "homepage": "https://sociallisteningapi.com/mcp",
+  "repository": "https://github.com/shash7/sociallisteningapi-examples",
+  "license": "MIT",
+  "keywords": ["social-listening", "social-media", "research", "mcp"],
+  "logo": "assets/sociallisteningapi-logo.svg",
+  "mcpServers": "mcp.json"
+}
