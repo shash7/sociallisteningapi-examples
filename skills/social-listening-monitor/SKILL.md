@@ -1,13 +1,39 @@
 ---
 name: social-listening-monitor
 description: Search public LinkedIn, X, and Reddit posts for brand monitoring, competitor monitoring, public-conversation research, and weekly marketing briefs. Use when a marketer needs sourced mentions, competitor launch or pricing research, or a concise review brief from public posts.
+metadata:
+  openclaw:
+    requires:
+      env:
+        - SOCIALLISTENING_API_KEY
+      bins:
+        - node
+    primaryEnv: SOCIALLISTENING_API_KEY
+    envVars:
+      - name: SOCIALLISTENING_API_KEY
+        required: true
+        description: API key used to search public posts with SocialListeningAPI.
+    homepage: https://sociallisteningapi.com
 ---
 
 # Social Listening Monitor
 
-Search public conversations with SocialListeningAPI, then turn the returned posts into a
-sourced review list. Treat search results as research leads. A person must review them before
-acting.
+Search public conversations with [SocialListeningAPI](https://sociallisteningapi.com), then turn
+the returned posts into a sourced review list. Treat search results as research leads. A person
+must review them before acting.
+
+## Get an API key
+
+Before the first search:
+
+1. Create an account at [SocialListeningAPI](https://sociallisteningapi.com).
+2. Copy the API key from
+   [Settings > API key](https://app.sociallisteningapi.com/settings/api-key).
+3. Store it as `SOCIALLISTENING_API_KEY` in the OpenClaw process environment. Never put the key in
+   a prompt, command argument, or committed file.
+
+New accounts receive 100 free credits after signup. More credits are available as one-time credit
+packs, and credit packs never expire.
 
 ## Run a search
 

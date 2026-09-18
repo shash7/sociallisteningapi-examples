@@ -1,0 +1,33 @@
+# Submission-ready manifest for optional-mcps/sociallisteningapi in NousResearch/hermes-agent.
+manifest_version: 1
+
+name: sociallisteningapi
+description: Search public social posts and web results with source links.
+source: https://sociallisteningapi.com/mcp
+
+transport:
+  type: http
+  url: https://api.sociallisteningapi.com/mcp
+
+auth:
+  type: oauth
+
+suggest:
+  keywords:
+    - sociallisteningapi
+    - social listening
+    - social media search
+    - linkedin post search
+    - reddit search
+    - twitter search
+  hosts:
+    - sociallisteningapi.com
+
+post_install: |
+  On first connection, Hermes opens a browser to sign in to SocialListeningAPI
+  and approve access to workspace credits. New accounts receive 100 free credits.
+  More credits are sold in one-time packs, and credit packs never expire.
+
+  After authentication, restart the Hermes session so the tools are loaded.
+  You can re-run the tool checklist at any time with:
+    hermes mcp configure sociallisteningapi

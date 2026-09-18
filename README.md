@@ -1,7 +1,8 @@
 # SocialListeningAPI Cursor plugin and examples
 
 This repository installs the SocialListeningAPI MCP in Cursor. It also includes working brand and
-competitor research examples for n8n, OpenClaw, and JavaScript.
+competitor research examples for n8n, OpenClaw, and JavaScript. The reusable agent skill also
+works with Skills.sh-compatible agents and Hermes.
 
 SocialListeningAPI searches current public social posts and web results. Cursor can use those
 results while researching a market, checking product feedback, finding public conversations, or
@@ -96,7 +97,7 @@ proof run used 4 credits.
 
 1. Create a SocialListeningAPI account and copy your API key.
 2. Choose an example:
-   - `openclaw/` for an installable agent skill;
+   - `skills/social-listening-monitor/` for the installable agent skill;
    - `n8n/` for a scheduled, no-LLM review workflow;
    - `javascript-agent/` for a dependency-free Node.js example.
 3. Add the API key through an environment variable or credential store.
@@ -108,12 +109,34 @@ proof run used 4 credits.
 Install the local skill from this repository:
 
 ```bash
-openclaw skills install ./openclaw/social-listening-monitor
+openclaw skills install ./skills/social-listening-monitor
 ```
 
 Set `SOCIALLISTENING_API_KEY` in the OpenClaw process environment. The skill passes search input
 through environment values and uses a fixed command, so query text is never placed in a shell
 command.
+
+The same skill can be installed through the open agent skills CLI:
+
+```bash
+npx skills add shash7/sociallisteningapi-examples --skill social-listening-monitor
+```
+
+Publish the skill folder to ClawHub after signing in:
+
+```bash
+clawhub skill publish ./skills/social-listening-monitor \
+  --slug social-listening-monitor \
+  --name "Social Listening Monitor" \
+  --changelog "Add API key signup and credit guidance"
+```
+
+### Hermes MCP catalog
+
+The submission-ready Hermes manifest is at
+`hermes/optional-mcps/sociallisteningapi/manifest.yaml`. Copy it to
+`optional-mcps/sociallisteningapi/manifest.yaml` in a Hermes Agent fork, verify the hosted OAuth
+flow, then open a pull request against `NousResearch/hermes-agent`.
 
 ### n8n
 
